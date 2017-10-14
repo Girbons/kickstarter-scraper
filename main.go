@@ -5,18 +5,21 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/antchfx/xquery/html"
-	"github.com/gorilla/mux"
 	"log"
 	"strings"
+
+	"github.com/antchfx/xquery/html"
+	"github.com/gorilla/mux"
 )
 
+// Project info to retrieve.
 type Project struct {
 	Creator string `json:"creator"`
 	Amount  string `json:"amount"`
 	Backers string `json:"backers"`
 }
 
+// ScrapeProject parse request.Body and extract the required info.
 func ScrapeProject(url string) Project {
 	doc, err := htmlquery.LoadURL(url)
 
@@ -28,10 +31,11 @@ func ScrapeProject(url string) Project {
 	amount := htmlquery.InnerText(htmlquery.FindOne(doc, "//div[@class='NS_campaigns__spotlight_stats']//span/text()"))
 	backers := htmlquery.InnerText(htmlquery.FindOne(doc, "//div[@class='NS_campaigns__spotlight_stats']//b/text()"))
 
-	project := Project{strings.TrimSpace(creator), amount, backers}
-	return project
+	return Project{strings.TrimSpace(creator), amount, backers}
+
 }
 
+// ProjectScraper return the json response.
 func ProjectScraper(w http.ResponseWriter, r *http.Request) {
 	vars := r.URL.Query()
 	url := vars.Get("url")
