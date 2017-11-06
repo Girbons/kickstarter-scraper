@@ -10,29 +10,48 @@ import (
 
 	"github.com/antchfx/xquery/html"
 	"github.com/gorilla/mux"
+	"golang.org/x/net/html"
 )
 
 // Project info to retrieve.
 type Project struct {
-	Creator string `json:"creator"`
-	Amount  string `json:"amount"`
-	Backers string `json:"backers"`
+	Creator     string         `json:"creator"`
+	Amount      string         `json:"amount"`
+	Backers     string         `json:"backers"`
+	PledgeLevel []*PledgeLevel `json:"pledge_levels"`
+}
+
+// PledgeLevel info to retrieve.
+type PledgeLevel struct {
+	Title  string `json:"title"`
+	Amount string `json:"amount"`
+}
+
+// ParseLevel Retrieve the core info of a PledgeLevel.
+func ParseLevel(node *html.Node) *PledgeLevel {
+	amount := htmlquery.InnerText(htmlquery.FindOne(node, "//h2[@class='pledge__amount']//span[@class='money']/text()"))
+	title := strings.TrimSpace(htmlquery.InnerText(htmlquery.FindOne(node, "//h3[@class='pledge__title']/text()")))
+	return &PledgeLevel{title, amount}
 }
 
 // ScrapeProject parse request.Body and extract the required info.
-func ScrapeProject(url string) Project {
+func ScrapeProject(url string) *Project {
 	doc, err := htmlquery.LoadURL(url)
 
 	if err != nil {
 		panic(err)
 	}
 
-	creator := htmlquery.InnerText(htmlquery.FindOne(doc, "//div[@class='creator-name']//div//a/text()"))
-	amount := htmlquery.InnerText(htmlquery.FindOne(doc, "//div[@class='NS_campaigns__spotlight_stats']//span/text()"))
-	backers := htmlquery.InnerText(htmlquery.FindOne(doc, "//div[@class='NS_campaigns__spotlight_stats']//b/text()"))
+	project := Project{}
 
-	return Project{strings.TrimSpace(creator), amount, backers}
+	project.Creator = strings.TrimSpace(htmlquery.InnerText(htmlquery.FindOne(doc, "//div[@class='creator-name']//div//a/text()")))
+	project.Amount = htmlquery.InnerText(htmlquery.FindOne(doc, "//div[@class='NS_campaigns__spotlight_stats']//span/text()"))
+	project.Backers = htmlquery.InnerText(htmlquery.FindOne(doc, "//div[@class='NS_campaigns__spotlight_stats']//b/text()"))
 
+	for _, level := range htmlquery.Find(doc, "//div[@class='pledge__info']") {
+		project.PledgeLevel = append(project.PledgeLevel, ParseLevel(level))
+	}
+	return &project
 }
 
 // ProjectScraper return the json response.
