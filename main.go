@@ -15,10 +15,11 @@ import (
 
 // Project info to retrieve.
 type Project struct {
-	Creator     string         `json:"creator"`
-	Amount      string         `json:"amount"`
-	Backers     string         `json:"backers"`
-	PledgeLevel []*PledgeLevel `json:"pledge_levels"`
+	Creator        string         `json:"creator"`
+	AmountPledged  string         `json:"amount_pledged"`
+	AmountRequired string         `json:"amount_required"`
+	Backers        string         `json:"backers"`
+	PledgeLevel    []*PledgeLevel `json:"pledge_levels"`
 }
 
 // PledgeLevel info to retrieve.
@@ -45,8 +46,9 @@ func ScrapeProject(url string) *Project {
 	project := Project{}
 
 	project.Creator = strings.TrimSpace(htmlquery.InnerText(htmlquery.FindOne(doc, "//div[@class='creator-name']//div//a/text()")))
-	project.Amount = htmlquery.InnerText(htmlquery.FindOne(doc, "//div[@class='NS_campaigns__spotlight_stats']//span/text()"))
+	project.AmountPledged = htmlquery.InnerText(htmlquery.FindOne(doc, "//div[@class='NS_campaigns__spotlight_stats']//span/text()"))
 	project.Backers = htmlquery.InnerText(htmlquery.FindOne(doc, "//div[@class='NS_campaigns__spotlight_stats']//b/text()"))
+	project.AmountRequired = htmlquery.InnerText(htmlquery.FindOne(doc, "//div[@class='type-12 medium navy-500']//span[@class='money']//span/text()"))
 
 	for _, level := range htmlquery.Find(doc, "//div[@class='pledge__info']") {
 		project.PledgeLevel = append(project.PledgeLevel, ParseLevel(level))
