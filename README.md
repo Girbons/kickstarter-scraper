@@ -7,8 +7,7 @@
 ## Install
 
 ```
-go get github.com/gorilla/mux
-go get github.com/antchfx/xquery/html
+go get github.com/Girbons/kickstarter-scraper
 ```
 
 ## Run project
