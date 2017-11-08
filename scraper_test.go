@@ -1,20 +1,29 @@
 package main
 
 import (
-	"github.com/gorilla/mux"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"strings"
+
+	"github.com/gorilla/mux"
+	"github.com/stretchr/testify/assert"
+
 	"testing"
 )
 
 func TestScraper(t *testing.T) {
 	url := "https://www.kickstarter.com/projects/tabulagames/barbarians-the-invasion"
 	result := ScrapeProject(url)
-	if (result != Project{"Tabula Games", "£165,988", "2,034 backers"}) {
-		t.Errorf("Result was incorrect, %v", result)
-	}
+
+	assert.Equal(t, result.Creator, "Tabula Games")
+	assert.Equal(t, result.AmountPledged, "£165,988")
+	assert.Equal(t, result.AmountRequired, "£25,000")
+	assert.Equal(t, result.Backers, "2,034 backers")
+	assert.Equal(t, result.PledgeLevel[0], &PledgeLevel{"Barbarian Spirit", "£1"})
+	assert.Equal(t, result.PledgeLevel[1], &PledgeLevel{"Wooden Edition", "£40"})
+	assert.Equal(t, result.PledgeLevel[2], &PledgeLevel{"Iron Edition - EARLY BIRD", "£60"})
+	assert.Equal(t, result.PledgeLevel[3], &PledgeLevel{"Iron Edition", "£67"})
+	assert.Equal(t, result.PledgeLevel[4], &PledgeLevel{"Iron & Blood Edition (KS Exclusive)", "£85"})
 }
 
 func executeRequest(req *http.Request) *httptest.ResponseRecorder {
@@ -31,10 +40,9 @@ func TestProjectScraperEndpoint(t *testing.T) {
 	response := executeRequest(req)
 	bodyBytes, _ := ioutil.ReadAll(response.Body)
 	bodyString := string(bodyBytes)
-	result := strings.TrimSpace(`{"creator":"Tabula Games","amount":"£165,988","backers":"2,034 backers"}`)
-	if bodyString != result {
-		t.Errorf("Incorrect response, %v", response.Body)
-	}
+	result := `{"creator":"Tabula Games","amount_pledged":"£165,988","amount_required":"£25,000","backers":"2,034 backers","pledge_levels":[{"title":"Barbarian Spirit","amount":"£1"},{"title":"Wooden Edition","amount":"£40"},{"title":"Iron Edition - EARLY BIRD","amount":"£60"},{"title":"Iron Edition","amount":"£67"},{"title":"Iron \u0026 Blood Edition (KS Exclusive)","amount":"£85"}]}`
+
+	assert.Equal(t, bodyString, result, "They must be equal")
 }
 
 func TestProjectScraperEndpointEmptyUrl(t *testing.T) {
@@ -42,10 +50,8 @@ func TestProjectScraperEndpointEmptyUrl(t *testing.T) {
 	response := executeRequest(req)
 	bodyBytes, _ := ioutil.ReadAll(response.Body)
 	bodyString := string(bodyBytes)
-	result := "accepted param is only url"
-	if bodyString != result {
-		t.Errorf("Incorrect response, %v", response.Body)
-	}
+
+	assert.Equal(t, bodyString, "accepted param is only url")
 }
 
 func TestProjectScraperEndpointNotKickstarter(t *testing.T) {
@@ -53,8 +59,6 @@ func TestProjectScraperEndpointNotKickstarter(t *testing.T) {
 	response := executeRequest(req)
 	bodyBytes, _ := ioutil.ReadAll(response.Body)
 	bodyString := string(bodyBytes)
-	result := "Insert a kickstarter url"
-	if bodyString != result {
-		t.Errorf("Incorrect response, %v", response.Body)
-	}
+
+	assert.Equal(t, bodyString, "Insert a kickstarter url")
 }
