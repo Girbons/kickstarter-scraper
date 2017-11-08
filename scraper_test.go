@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 
+	"github.com/girbons/kickstarter-scraper/scraper"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 
@@ -13,23 +14,23 @@ import (
 
 func TestScraper(t *testing.T) {
 	url := "https://www.kickstarter.com/projects/tabulagames/barbarians-the-invasion"
-	result := ScrapeProject(url)
+	result := scraper.ScrapeProject(url)
 
 	assert.Equal(t, result.Creator, "Tabula Games")
 	assert.Equal(t, result.AmountPledged, "£165,988")
 	assert.Equal(t, result.AmountRequired, "£25,000")
 	assert.Equal(t, result.Backers, "2,034 backers")
-	assert.Equal(t, result.PledgeLevel[0], &PledgeLevel{"Barbarian Spirit", "£1"})
-	assert.Equal(t, result.PledgeLevel[1], &PledgeLevel{"Wooden Edition", "£40"})
-	assert.Equal(t, result.PledgeLevel[2], &PledgeLevel{"Iron Edition - EARLY BIRD", "£60"})
-	assert.Equal(t, result.PledgeLevel[3], &PledgeLevel{"Iron Edition", "£67"})
-	assert.Equal(t, result.PledgeLevel[4], &PledgeLevel{"Iron & Blood Edition (KS Exclusive)", "£85"})
+	assert.Equal(t, result.PledgeLevel[0], &scraper.PledgeLevel{"Barbarian Spirit", "£1"})
+	assert.Equal(t, result.PledgeLevel[1], &scraper.PledgeLevel{"Wooden Edition", "£40"})
+	assert.Equal(t, result.PledgeLevel[2], &scraper.PledgeLevel{"Iron Edition - EARLY BIRD", "£60"})
+	assert.Equal(t, result.PledgeLevel[3], &scraper.PledgeLevel{"Iron Edition", "£67"})
+	assert.Equal(t, result.PledgeLevel[4], &scraper.PledgeLevel{"Iron & Blood Edition (KS Exclusive)", "£85"})
 }
 
 func executeRequest(req *http.Request) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
 	router := mux.NewRouter()
-	router.HandleFunc("/kickstarter-project", ProjectScraper).Methods("GET")
+	router.HandleFunc("/kickstarter-project", scraper.ProjectScraper).Methods("GET")
 	router.ServeHTTP(rr, req)
 
 	return rr
