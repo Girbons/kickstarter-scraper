@@ -8,6 +8,7 @@ WORKDIR /app
 
 RUN go get github.com/gorilla/mux
 RUN go get github.com/antchfx/xquery/html
+RUN go get github.com/girbons/kickstarter-scraper
 
 RUN go build -o main .
 
