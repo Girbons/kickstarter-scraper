@@ -9,10 +9,7 @@ env:
 before_install:
   - go get github.com/gorilla/mux
   - go get github.com/antchfx/xquery/html
-  - go get github.com/axw/gocov/gocov
-  - go get github.com/mattn/goveralls
   - go get github.com/stretchr/testify
 
 script:
-  - go test -v -covermode=count -coverprofile=coverage.out ./...
-  - goveralls -coverprofile=coverage.out -service travis-ci -repotoken $COVERALLS_TOKEN
+  - go test -v

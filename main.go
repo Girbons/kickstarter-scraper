@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/girbons/kickstarter-scraper/scraper"
+	"github.com/Girbons/kickstarter-scraper/scraper"
 	"github.com/gorilla/mux"
 )
 

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	"github.com/girbons/kickstarter-scraper/scraper"
+	"github.com/Girbons/kickstarter-scraper/scraper"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 
